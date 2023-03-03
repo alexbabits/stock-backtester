@@ -1,0 +1,39 @@
+Alright so, we have these two dictionaries with, what I think are the same keys, but their values are complex. They are the dataframes of price or entries associated with the symbol.
+Essentially entire .csv files are the values in the key-value pair of these dictionaries.
+
+The first thing to do is to check and confirm that both of the dictionaries 'price_data_dict' and 'trade_entries_dict' have some/all of the same keys.
+Nice, this code confirms that all 14 keys are identical:
+
+# Get the set of keys for each dictionary
+keys1 = set(price_data_dict.keys())
+keys2 = set(trade_entries_dict.keys())
+
+# Get the intersection of the two sets
+shared_keys = keys1.intersection(keys2)
+
+# Check if there are any shared keys
+if shared_keys:
+    print(f"The dictionaries share the following keys: {shared_keys}")
+else:
+    print("The dictionaries do not share any keys.")
+
+Alright, so they have all the same keys. But they have complex, weird values associated with each of their keys.
+They are both .csv files basically, but they have different columns. The only similar column in the dataframes are 'datetime'
+
+Ideally, I want to be able to say 'if the datetime is the same for both dictionaries, then add the columns from one dicionary with the other.'
+
+It's kind of like merging the two dictionaries, but since the keys are the same, its just gonna be altering the values of the key-value pairs to include rows from the other dictionaries values.
+
+
+This checks if the datetime index was in correct format, can also do it for the other dictionary:
+"for key, value in trade_entries_dict.items():
+    if value.index.dtype != 'datetime64[ns]':
+        print(f"datetime index in {key} is not in datetime format.")
+    else:
+        print(f"datetime index in {key} is in datetime format.")"
+
+
+Sets the row viewing back to the small amount: pd.options.display.max_rows = 100
+View all rows: "pd.set_option('display.max_rows', None)  # To show all rows"
+
+You can view all 13 columns at once with a single symbol, but can't for the entire dict. 'price_and_trades_dict['A']' will show all perfectly.
