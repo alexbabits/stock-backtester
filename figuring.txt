@@ -62,35 +62,61 @@ Trade_Num	entry_date	exit_date	days_in_trade		win_loss	p_l
 7	5/14/2018	5/16/2018	2		-1	-100	
 8	5/21/2018	5/30/2018	9		1	150	}
 
-My idea on how to achieve this:		
 
-Firstly, I think 'price_and_trades_dict' will have to be an input/argument for our function so we can analyze and iterate through it. Also, I think we have to iterate through the 'price_and_trades_dict' at least once to get data for our new dictionaries values (DataFrames which will hold the trade number as it's index and then columns which will hold: entry date, exit date, days in trade, win loss amount, and profit loss amount.) Next we'll have to declare the new dictionary, so this first part might look something like this:
+I don't want to check if c1 is true for the 'entry_date' row. Firstly, I just want to spot a valid trade entry when iterating the rows, by seeing if the 'target' and 'stop' values are positive. If they are, then the iteration has landed upon a valid trade entry. Thus, we have the entry date equal the current datetime index of where this iteration is.
 
-def create_trade_results_dict(price_and_trades_dict):
-    trade_results_dict = {}
+After the entry row is found, and the entry date is assigned as the current datetime index, then a separate process begins. Continue iterating from this point forward through the rows, looking for when c1 or c2 are satisfied with respect to the 'target' and 'stop' value of the initial row where the entry was first found (positive values for 'target' and 'stop'). When either condition is satisfied from the data in a row, this is the exiting of the trade. Wherever this row is, that datetime index will be the exit date. Does this change your concept of the process at all, and does it change this codeblock at all?:
 
-Does this look like a good start so far? Is there anything you need me to explain further or you would like to change?
+"        for datetime, row in price_and_trades_df.iterrows():
 
-My idea is to have 2 loops which iterate through the DataFrames to get the trade results of a trade entry.
+            c1 = (row['target'] <= row['open']) or (row['target'] <= row['high']) or (row['target'] <= row['low']) or (row['target'] <= row['close'])
+            c2 = (row['stop'] >= row['open']) or (row['stop'] >= row['high']) or (row['stop'] >= row['low']) or (row['stop'] >= row['close'])
 
-Loop 1: This loop will go through all the key-value pairs in the 'price_and_trades_dict', specifically looking to iterate through the 'target' and 'stop' columns of the values DataFrames for each stock. I need to check and see which rows have positive numbers for both of these columns, basically making sure they are valid with data in them.		
+            if row['target'] > 0 and row['stop'] > 0:
+                entry_date = datetime
+                
+                if c1:
 
-If that loop, or check, finds a row with valid data for 'target' and 'stop' columns, then I think we need a second loop to actually compare the trade entry data with the historical price data and see how the trade did (did it win or lose, what was the profit loss, entry and exit date, number of days held).
-		
-Loop 2: If 'target' and 'stop' columns have positive numbers in that row, starting from that row, iterate through every key's value DataFrame and see how the 'open', 'high', 'low', 'close', column numbers compare to the 'target' and 'stop' numbers for that row. The loop would continue until either the 'target_condition_met' or 'stop_condition_met' are satisfied. 
+                    exit_date_index = price_and_trades_df.loc[row.name+pd.Timedelta(days=1):][c1].index
+                    exit_date = exit_date_index.values[0]
+                    days_in_trade = (exit_date - entry_date).days
+                    win_loss = 1
+                    p_l = 150.0
+                    trade_results_df.loc[trade_num] = {'trade_num': trade_num,
+                                    'entry_date': entry_date, 
+                                    'exit_date': exit_date, 
+                                    'days_in_trade': days_in_trade, 
+                                    'win_loss': win_loss, 
+                                    'p_l': p_l}
+                    trade_num += 1
 
-In depth explanation of the new dictionary 'trade_results_dict' we will be creating and filling:
+                elif c2:
+                    exit_date_index = price_and_trades_df.loc[row.name+pd.Timedelta(days=1):][c2].index
+                    exit_date = exit_date_index.values[0]
+                    days_in_trade = (exit_date - entry_date).days
+                    win_loss = -1
+                    p_l = -100.0
+                    trade_results_df.loc[trade_num] = {'trade_num': trade_num,
+                                    'entry_date': entry_date, 
+                                    'exit_date': exit_date, 
+                                    'days_in_trade': days_in_trade, 
+                                    'win_loss': win_loss, 
+                                    'p_l': p_l}
+                    trade_num += 1
 
-The index which will be "trade_num", starting at 1 and increasing by 1 for every row. Simply tracking the trade number.
-The 'entry_date' column, which will be the datetime index for where the first loop found positive numbers for 'target' and 'stop' columns.
-The 'exit_date' column, which will be the datetime index for when 'target_condition_met' or 'stop_condition_met' were first satisfied.
-The 'days_in_trade' column which will subtract the 'exit_date' from the 'entry_date' to find the number of days the trade was held.  					
-The 'win_loss' column, which will output 1 if the 'target_condition_met' was satisfied, or -1 if the 'stop_condition_met' was satisfied.						
-The 'p_l' column, which will output 150 if win_loss is 1, or -100 if win_loss is -1.
+                else:
+                    exit_date = pd.NaT
+                    days_in_trade = np.NaN
+                    win_loss = np.NaN
+                    p_l = np.NaN
+                    trade_results_df.loc[trade_num] = {'trade_num': trade_num,
+                                    'entry_date': entry_date, 
+                                    'exit_date': exit_date, 
+                                    'days_in_trade': days_in_trade, 
+                                    'win_loss': win_loss, 
+                                    'p_l': p_l}
+                    trade_num += 1"
 
-target_condition = 'target <= open or target <= high or target <= low or target <= close'						
-stop_condition_met = 'stop >= open or stop >= high or stop >= low or stop >= close'		
-															
-
-
-
+I essentially want the loop to hop back to the entry place and then start searching for the next entry (when target and stop are both positive)
+When it finds an entry, then it starts looking for c1 or c2 to be met. When they are met, it fills the data, and then hops back to the last entry row,
+and begins searching for the next entry (when target and stop are both positive)
