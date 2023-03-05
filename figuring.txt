@@ -37,3 +37,86 @@ Sets the row viewing back to the small amount: pd.options.display.max_rows = 100
 View all rows: "pd.set_option('display.max_rows', None)  # To show all rows"
 
 You can view all 13 columns at once with a single symbol, but can't for the entire dict. 'price_and_trades_dict['A']' will show all perfectly.
+
+FINAL FIGURING:	
+
+Background information: 
+
+'price_and_trades_dict' is the dictionary where we will be getting all the data from. It's keys are stock symbols, such as 'A', 'ABB' etc. The values are DataFrames which have the historical price data and trade strategy data of that stock. The index of the DataFrames is the date which is denoted 'datetime'. The DataFrames have 13 columns: "open, high, low, close, volume, entry, target, stop, risk:reward, target_pct, stop_pct, target_profit, position_size". 
+
+The goals:
+
+I started to make a function called 'create_trade_results_dict'. The functions goal is to create and fill data in a new dictionary called 'trade_results_dict'. The dictionary 'trade_results_dict' will have the exact same keys as the 'price_and_trades_dict'. The values for each key will also be DataFrames, but with the following new index and new columns:
+The index will be 'trade_num', and the columns will be: 'entry_date' 'exit_date' 'days_in_trade' 'win_loss' 'p_l'. Explanation on them in depth later on.
+
+I want the new dictionary 'trade_results_dict' to look something like this:
+
+{'A': 							
+Trade_Num	entry_date	exit_date	days_in_trade		win_loss	p_l	
+1	3/12/2018	3/14/2018	2		1	150	
+2	3/19/2018	3/21/2018	2		1	150	
+3	3/27/2018	4/16/2018	20		-1	-100	
+4	4/19/2018	4/20/2018	1		1	150	
+5	5/2/2018	5/9/2018	7		-1	-100	
+6	5/11/2018	5/12/2018	1		-1	-100	
+7	5/14/2018	5/16/2018	2		-1	-100	
+8	5/21/2018	5/30/2018	9		1	150	}
+
+
+I don't want to check if c1 is true for the 'entry_date' row. Firstly, I just want to spot a valid trade entry when iterating the rows, by seeing if the 'target' and 'stop' values are positive. If they are, then the iteration has landed upon a valid trade entry. Thus, we have the entry date equal the current datetime index of where this iteration is.
+
+After the entry row is found, and the entry date is assigned as the current datetime index, then a separate process begins. Continue iterating from this point forward through the rows, looking for when c1 or c2 are satisfied with respect to the 'target' and 'stop' value of the initial row where the entry was first found (positive values for 'target' and 'stop'). When either condition is satisfied from the data in a row, this is the exiting of the trade. Wherever this row is, that datetime index will be the exit date. Does this change your concept of the process at all, and does it change this codeblock at all?:
+
+"        for datetime, row in price_and_trades_df.iterrows():
+
+            c1 = (row['target'] <= row['open']) or (row['target'] <= row['high']) or (row['target'] <= row['low']) or (row['target'] <= row['close'])
+            c2 = (row['stop'] >= row['open']) or (row['stop'] >= row['high']) or (row['stop'] >= row['low']) or (row['stop'] >= row['close'])
+
+            if row['target'] > 0 and row['stop'] > 0:
+                entry_date = datetime
+                
+                if c1:
+
+                    exit_date_index = price_and_trades_df.loc[row.name+pd.Timedelta(days=1):][c1].index
+                    exit_date = exit_date_index.values[0]
+                    days_in_trade = (exit_date - entry_date).days
+                    win_loss = 1
+                    p_l = 150.0
+                    trade_results_df.loc[trade_num] = {'trade_num': trade_num,
+                                    'entry_date': entry_date, 
+                                    'exit_date': exit_date, 
+                                    'days_in_trade': days_in_trade, 
+                                    'win_loss': win_loss, 
+                                    'p_l': p_l}
+                    trade_num += 1
+
+                elif c2:
+                    exit_date_index = price_and_trades_df.loc[row.name+pd.Timedelta(days=1):][c2].index
+                    exit_date = exit_date_index.values[0]
+                    days_in_trade = (exit_date - entry_date).days
+                    win_loss = -1
+                    p_l = -100.0
+                    trade_results_df.loc[trade_num] = {'trade_num': trade_num,
+                                    'entry_date': entry_date, 
+                                    'exit_date': exit_date, 
+                                    'days_in_trade': days_in_trade, 
+                                    'win_loss': win_loss, 
+                                    'p_l': p_l}
+                    trade_num += 1
+
+                else:
+                    exit_date = pd.NaT
+                    days_in_trade = np.NaN
+                    win_loss = np.NaN
+                    p_l = np.NaN
+                    trade_results_df.loc[trade_num] = {'trade_num': trade_num,
+                                    'entry_date': entry_date, 
+                                    'exit_date': exit_date, 
+                                    'days_in_trade': days_in_trade, 
+                                    'win_loss': win_loss, 
+                                    'p_l': p_l}
+                    trade_num += 1"
+
+I essentially want the loop to hop back to the entry place and then start searching for the next entry (when target and stop are both positive)
+When it finds an entry, then it starts looking for c1 or c2 to be met. When they are met, it fills the data, and then hops back to the last entry row,
+and begins searching for the next entry (when target and stop are both positive)
