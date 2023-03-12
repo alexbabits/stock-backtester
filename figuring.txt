@@ -1,54 +1,3 @@
-Alright so, we have these two dictionaries with, what I think are the same keys, but their values are complex. They are the dataframes of price or entries associated with the symbol.
-Essentially entire .csv files are the values in the key-value pair of these dictionaries.
-
-The first thing to do is to check and confirm that both of the dictionaries 'price_data_dict' and 'trade_entries_dict' have some/all of the same keys.
-Nice, this code confirms that all 14 keys are identical:
-
-# Get the set of keys for each dictionary
-keys1 = set(price_data_dict.keys())
-keys2 = set(trade_entries_dict.keys())
-
-# Get the intersection of the two sets
-shared_keys = keys1.intersection(keys2)
-
-# Check if there are any shared keys
-if shared_keys:
-    print(f"The dictionaries share the following keys: {shared_keys}")
-else:
-    print("The dictionaries do not share any keys.")
-
-Alright, so they have all the same keys. But they have complex, weird values associated with each of their keys.
-They are both .csv files basically, but they have different columns. The only similar column in the dataframes are 'datetime'
-
-Ideally, I want to be able to say 'if the datetime is the same for both dictionaries, then add the columns from one dicionary with the other.'
-
-It's kind of like merging the two dictionaries, but since the keys are the same, its just gonna be altering the values of the key-value pairs to include rows from the other dictionaries values.
-
-
-This checks if the datetime index was in correct format, can also do it for the other dictionary:
-"for key, value in trade_entries_dict.items():
-    if value.index.dtype != 'datetime64[ns]':
-        print(f"datetime index in {key} is not in datetime format.")
-    else:
-        print(f"datetime index in {key} is in datetime format.")"
-
-
-Sets the row viewing back to the small amount: pd.options.display.max_rows = 100
-View all rows: "pd.set_option('display.max_rows', None)  # To show all rows"
-
-You can view all 13 columns at once with a single symbol, but can't for the entire dict. 'price_and_trades_dict['A']' will show all perfectly.
-
-FINAL FIGURING:	
-
-Background information: 
-
-'price_and_trades_dict' is the dictionary where we will be getting all the data from. It's keys are stock symbols, such as 'A', 'ABB' etc. The values are DataFrames which have the historical price data and trade strategy data of that stock. The index of the DataFrames is the date which is denoted 'datetime'. The DataFrames have 13 columns: "open, high, low, close, volume, entry, target, stop, risk:reward, target_pct, stop_pct, target_profit, position_size". 
-
-The goals:
-
-I started to make a function called 'create_trade_results_dict'. The functions goal is to create and fill data in a new dictionary called 'trade_results_dict'. The dictionary 'trade_results_dict' will have the exact same keys as the 'price_and_trades_dict'. The values for each key will also be DataFrames, but with the following new index and new columns:
-The index will be 'trade_num', and the columns will be: 'entry_date' 'exit_date' 'days_in_trade' 'win_loss' 'p_l'. Explanation on them in depth later on.
-
 I want the new dictionary 'trade_results_dict' to look something like this:
 
 {'A': 							
@@ -120,3 +69,71 @@ After the entry row is found, and the entry date is assigned as the current date
 I essentially want the loop to hop back to the entry place and then start searching for the next entry (when target and stop are both positive)
 When it finds an entry, then it starts looking for c1 or c2 to be met. When they are met, it fills the data, and then hops back to the last entry row,
 and begins searching for the next entry (when target and stop are both positive)
+
+
+
+"You can simply use the index value of the corresponding row as the entry or exit date for the trade in the trade_results_df DataFrame."
+
+ if row['target'] > 0 and row['stop'] > 0:
+
+                    exit_date_index = price_and_trades_df.loc[row.name+pd.Timedelta(days=1):][c1].index
+                    exit_date = exit_date_index.values[0]
+                    days_in_trade = (exit_date - entry_date).days
+
+                trade_results_df.loc[trade_num] = {'trade_num': trade_num,
+                                'entry_date': entry_date, 
+                                'exit_date': exit_date, 
+                                'days_in_trade': days_in_trade, 
+                                'win_loss': win_loss, 
+                                'p_l': p_l}
+
+                target_exit = (row['target'] <= row['open']) or (row['target'] <= row['high']) or (row['target'] <= row['low']) or (row['target'] <= row['close'])
+                stop_exit = (row['stop'] >= row['open']) or (row['stop'] >= row['high']) or (row['stop'] >= row['low']) or (row['stop'] >= row['close'])
+
+
+                    exit_date = pd.NaT
+                    days_in_trade = np.NaN
+                    win_loss = np.NaN
+                    p_l = np.NaN
+
+
+        trade_results_dict[symbol] = trade_results_df
+
+    return trade_results_dict
+
+trade_results_dict = create_trade_results_dict(price_and_trades_dict)
+
+
+
+
+
+I need a loop that loops through the rows in price_and_trades_df, and finds the following data and stores it in a DataFrame called 'entry_info_df' with the following info:
+
+pos_size
+entry price
+entry date
+target price
+stop price
+
+THEN, I need another loop that loops through the rows in price_and_trades_df, STARTING at the entry date, and finds the following data and stores it in a DataFrame called 'exit_info_df' with the following info:
+
+exit_price (will be either target or stop value from other DataFrame, depending on which is hit first)
+exit_date (When either target or stop is first hit)
+days in trade
+win_loss
+p_l
+
+THEN, Combine these two DataFrames for each key, so that it has the following:
+
+'pos_size'
+'target price'
+'stop price'
+'entry_price'
+'exit_price'
+'entry_date'
+'exit_date'
+'days_in_trade' 
+'win_loss' 
+'p_l' 
+
+
