@@ -1,4 +1,4 @@
-I want the new dictionary 'trade_results_dict' to look something like this:
+I want the new dictionary 'trade_results_dict' where each stock symbol has a key:value pair which is a dataframe which looks something like this:
 
 {'A': 							
 Trade_Num	entry_date	exit_date	days_in_trade		win_loss	p_l	
@@ -12,59 +12,8 @@ Trade_Num	entry_date	exit_date	days_in_trade		win_loss	p_l
 8	5/21/2018	5/30/2018	9		1	150	}
 
 
-I don't want to check if c1 is true for the 'entry_date' row. Firstly, I just want to spot a valid trade entry when iterating the rows, by seeing if the 'target' and 'stop' values are positive. If they are, then the iteration has landed upon a valid trade entry. Thus, we have the entry date equal the current datetime index of where this iteration is.
+I just want to spot a valid trade entry when iterating the rows, by seeing if the 'target' value is positive. If it is, then the iteration has landed upon a valid trade entry. Thus, we have the entry date equal the current datetime index of where this iteration is.
 
-After the entry row is found, and the entry date is assigned as the current datetime index, then a separate process begins. Continue iterating from this point forward through the rows, looking for when c1 or c2 are satisfied with respect to the 'target' and 'stop' value of the initial row where the entry was first found (positive values for 'target' and 'stop'). When either condition is satisfied from the data in a row, this is the exiting of the trade. Wherever this row is, that datetime index will be the exit date. Does this change your concept of the process at all, and does it change this codeblock at all?:
-
-"        for datetime, row in price_and_trades_df.iterrows():
-
-            c1 = (row['target'] <= row['open']) or (row['target'] <= row['high']) or (row['target'] <= row['low']) or (row['target'] <= row['close'])
-            c2 = (row['stop'] >= row['open']) or (row['stop'] >= row['high']) or (row['stop'] >= row['low']) or (row['stop'] >= row['close'])
-
-            if row['target'] > 0 and row['stop'] > 0:
-                entry_date = datetime
-                
-                if c1:
-
-                    exit_date_index = price_and_trades_df.loc[row.name+pd.Timedelta(days=1):][c1].index
-                    exit_date = exit_date_index.values[0]
-                    days_in_trade = (exit_date - entry_date).days
-                    win_loss = 1
-                    p_l = 150.0
-                    trade_results_df.loc[trade_num] = {'trade_num': trade_num,
-                                    'entry_date': entry_date, 
-                                    'exit_date': exit_date, 
-                                    'days_in_trade': days_in_trade, 
-                                    'win_loss': win_loss, 
-                                    'p_l': p_l}
-                    trade_num += 1
-
-                elif c2:
-                    exit_date_index = price_and_trades_df.loc[row.name+pd.Timedelta(days=1):][c2].index
-                    exit_date = exit_date_index.values[0]
-                    days_in_trade = (exit_date - entry_date).days
-                    win_loss = -1
-                    p_l = -100.0
-                    trade_results_df.loc[trade_num] = {'trade_num': trade_num,
-                                    'entry_date': entry_date, 
-                                    'exit_date': exit_date, 
-                                    'days_in_trade': days_in_trade, 
-                                    'win_loss': win_loss, 
-                                    'p_l': p_l}
-                    trade_num += 1
-
-                else:
-                    exit_date = pd.NaT
-                    days_in_trade = np.NaN
-                    win_loss = np.NaN
-                    p_l = np.NaN
-                    trade_results_df.loc[trade_num] = {'trade_num': trade_num,
-                                    'entry_date': entry_date, 
-                                    'exit_date': exit_date, 
-                                    'days_in_trade': days_in_trade, 
-                                    'win_loss': win_loss, 
-                                    'p_l': p_l}
-                    trade_num += 1"
 
 I essentially want the loop to hop back to the entry place and then start searching for the next entry (when target and stop are both positive)
 When it finds an entry, then it starts looking for c1 or c2 to be met. When they are met, it fills the data, and then hops back to the last entry row,
@@ -104,10 +53,7 @@ and begins searching for the next entry (when target and stop are both positive)
 trade_results_dict = create_trade_results_dict(price_and_trades_dict)
 
 
-
-
-
-I need a loop that loops through the rows in price_and_trades_df, and finds the following data and stores it in a DataFrame called 'entry_info_df' with the following info:
+I need a loop that loops through the rows in price_and_trades_dict for each key (stock ticker), and finds the following data and stores it in another dictionary called 'entry_info_dict' with the following info:
 
 pos_size
 entry price
@@ -115,15 +61,15 @@ entry date
 target price
 stop price
 
-THEN, I need another loop that loops through the rows in price_and_trades_df, STARTING at the entry date, and finds the following data and stores it in a DataFrame called 'exit_info_df' with the following info:
+THEN, I need a loop that iterates through the rows in price_and_trades_df, STARTING at the entry date of a trade (Where the 'target' value is positive and therefore exists), and finds the following data and stores it in a DataFrame called 'exit_info_df' with the following info:
 
 exit_price (will be either target or stop value from other DataFrame, depending on which is hit first)
 exit_date (When either target or stop is first hit)
-days in trade
-win_loss
-p_l
+days in trade (Easy subtraction of exit - entry date)
+win_loss (-1 for stop hit, +1 for target hit)
+p_l (-100 for stop hit, +150 for target hit)
 
-THEN, Combine these two DataFrames for each key, so that it has the following:
+Making sure we have all the pieces of info:
 
 'pos_size'
 'target price'
