@@ -1,85 +1,145 @@
-I want the new dictionary 'trade_results_dict' where each stock symbol has a key:value pair which is a dataframe which looks something like this:
+So let me explain and show you what our 'price_and_trades_dict' looks like. Please try to remember what it looks like, so you can more effectively help me. It has so many columns that I will have to paste it in chunks. Right now it has 20 key value pairs. And so I just copy pasted the output it gave me from the top, so this first chunk shows the first key which is a stock symbol, and it's corresponding value which has a lot of columns with rows full of data. The first chunk of columns are the date (which is the index, datetime) and price data (open, high, low, close, volume).
 
-{'A': 							
-Trade_Num	entry_date	exit_date	days_in_trade		win_loss	p_l	
-1	3/12/2018	3/14/2018	2		1	150	
-2	3/19/2018	3/21/2018	2		1	150	
-3	3/27/2018	4/16/2018	20		-1	-100	
-4	4/19/2018	4/20/2018	1		1	150	
-5	5/2/2018	5/9/2018	7		-1	-100	
-6	5/11/2018	5/12/2018	1		-1	-100	
-7	5/14/2018	5/16/2018	2		-1	-100	
-8	5/21/2018	5/30/2018	9		1	150	}
+"{'A':                   open        high         low       close    volume  \
+ datetime                                                               
+ 2018-04-11   63.573407   64.170788   63.419239   63.669758   1391400   
+ 2018-04-12   64.132246   65.172855   64.026257   64.748901   2180900   
+ 2018-04-13   65.037961   65.201758   64.440572   64.758537   2043900   
+ 2018-04-16   65.355922   65.876227   65.028320   65.683517   2887800   
+ 2018-04-17   66.097832   66.338714   65.587165   65.943672   2682600   
+ 2018-04-18   66.598867   67.726190   66.146009   67.013184   2678300   
+ 2018-04-19   66.945739   67.051720   64.903063   65.490814   2435100   
+ 2018-04-20   65.558261   65.770238   64.864522   65.086136   1917200   
+ 2018-04-23   65.240304   66.165287   65.066869   65.587173   2260600   "
+
+The next chunk I'm pasting is just a continuation of the first key 'A'. It shows the datetime index again thankfully as a reference. And here are some further columns. These columns show (entry, target, stop, risk:reward, target_pct). You'll notice a lot of the data is NaN because these columns only have data if a trade is triggered when certain conditions are met. If a row has data for the target/stop/etc. it basically means a trade was triggered/spotted and entered for that specific stock on that day:
+
+"               entry      target        stop  risk:reward  target_pct  \
+ datetime                                                                  
+ 2018-04-11         NaN         NaN         NaN          NaN         NaN   
+ 2018-04-12         NaN         NaN         NaN          NaN         NaN   
+ 2018-04-13         NaN         NaN         NaN          NaN         NaN   
+ 2018-04-16         NaN         NaN         NaN          NaN         NaN   
+ 2018-04-17         NaN         NaN         NaN          NaN         NaN   
+ 2018-04-18         NaN         NaN         NaN          NaN         NaN   
+ 2018-04-19   65.558261         NaN         NaN          NaN         NaN   
+ 2018-04-20         NaN         NaN         NaN          NaN         NaN   
+ 2018-04-23         NaN         NaN         NaN          NaN         NaN   
+ 2018-04-24         NaN         NaN         NaN          NaN         NaN   
+ 2018-04-25         NaN         NaN         NaN          NaN         NaN   
+ 2018-04-26         NaN         NaN         NaN          NaN         NaN   
+ 2018-04-27         NaN         NaN         NaN          NaN         NaN   
+ 2018-04-30         NaN         NaN         NaN          NaN         NaN   
+ 2018-05-01         NaN         NaN         NaN          NaN         NaN   
+ 2018-05-02         NaN         NaN         NaN          NaN         NaN   
+ 2018-05-03         NaN         NaN         NaN          NaN         NaN   
+ 2018-05-04         NaN         NaN         NaN          NaN         NaN   
+ 2018-05-07         NaN         NaN         NaN          NaN         NaN   
+ 2018-05-08   64.922330   66.764041   63.694522          1.5    0.028368   
+ 2018-05-09         NaN         NaN         NaN          NaN         NaN   
+ 2018-05-10         NaN         NaN         NaN          NaN         NaN   
+ 2018-05-11         NaN         NaN         NaN          NaN         NaN   
+ 2018-05-14         NaN         NaN         NaN          NaN         NaN   
+ 2018-05-15         NaN         NaN         NaN          NaN         NaN   "
+
+Lastly, here are the last few columns with further trade information (stop_pct, target_profit, position_size). Similar to the last chunk, you'll see the rows that are fully filled with data are essentially the dates where a trade was triggered on that day due to conditions being met:
+
+"             stop_pct  target_profit  position_size  
+ datetime                                            
+ 2018-04-11       NaN            NaN            NaN  
+ 2018-04-12       NaN            NaN            NaN  
+ 2018-04-13       NaN            NaN            NaN  
+ 2018-04-16       NaN            NaN            NaN  
+ 2018-04-17       NaN            NaN            NaN  
+ 2018-04-18       NaN            NaN            NaN  
+ 2018-04-19       NaN          150.0            NaN  
+ 2018-04-20       NaN            NaN            NaN  
+ 2018-04-23       NaN            NaN            NaN  
+ 2018-04-24       NaN            NaN            NaN  
+ 2018-04-25       NaN            NaN            NaN  
+ 2018-04-26       NaN            NaN            NaN  
+ 2018-04-27       NaN            NaN            NaN  
+ 2018-04-30       NaN            NaN            NaN  
+ 2018-05-01       NaN            NaN            NaN  
+ 2018-05-02       NaN            NaN            NaN  
+ 2018-05-03       NaN            NaN            NaN  
+ 2018-05-04       NaN            NaN            NaN  
+ 2018-05-07       NaN            NaN            NaN  
+ 2018-05-08 -0.018912          150.0    5287.663335  
+ 2018-05-09       NaN            NaN            NaN  
+ 2018-05-10       NaN            NaN            NaN  
+ 2018-05-11       NaN            NaN            NaN  
+ 2018-05-14       NaN            NaN            NaN  
+ 2018-05-15       NaN            NaN            NaN  "
+
+So that is what a single key:value pair looks like, and this dictionary 'price_and_trades_dict' holds 20 key:value pairs that look like this. 
+In summary, the value data for the 'price_and_trades_dict' has a datetime index, and then the following columns: open, high, low, close, volume, entry, target, stop, risk:reward, target_pct, stop_pct, target_profit, position_size.
+
+Here is a brief english description of each column:
+
+open: opening price of the stock on that date.
+high: highest price of the stock on that date.
+low: lowest price of the stock on that date.
+close: closing price of the stock on that date.
+volume: Amount of volume that was traded for this stock.
+entry: The price of the stock at the time a trade entry was triggered.
+target: A target price of the stock where a trade would exit it's long position with a gain.
+stop: A stop price of the stock where a trade would exit it's long position with a loss.
+risk:reward: the risk to reward ratio based on the entry, target, and stop prices.
+target_pct: The percent increase from the entry price to the target price.
+stop_pct: The percent decrease from the entry price to the target price.
+target_profit: The amount of profit that would be gained if the stock hits the target price.
+position_size: The calculated position size based on some things.
+
+That is my attempt at summarizing what 'price_and_trades_dict' looks like. Next, I will need your help creating a new dictionary, or place to house trading results extracted from the 'price_and_trades_dict' dictionary. Is there anything else you need clarification on in regards to this dictionary I've shown?
+
+I need your help to copy and alter some of the columns, along with their row data, from this 'price_and_trades_dict' dictionary into a new dictionary that hasn't been created yet. I think a good name for it would be 'trade_results_dict'. The goal of this new dictionary I want to create, would be to house all of the trade results data, which would be some identical columns to 'price_and_trades_dict' and also have some new additional columns. Also importantly, all the keys are identical and you'll just be using the same keys as in 'price_and_trades_dict', which should make sense to you. Here are the following columns that I want in our new dictionary's value for each key:
+
+trade_num = A new index, which will simply index the trade number, starting from 1 in row 1, and increasing by 1 for each trade. Example row value: 5
+entry_date = A new column, which will be the datetime index from 'price_and_trades_dict' when a trade is triggered. A trade is defined as triggered anytime a loop would see a row in which every column's value is filled in, and there are no 'NaN' values, but instead number values. Example row value: 2018-05-08
+entry = identical column from 'price_and_trades_dict'. Example row value: 64.922330
+target = identical column from 'price_and_trades_dict'. Example row value: 66.764041
+stop = identical column from 'price_and_trades_dict'. Example row value: 63.694522 
+exit_price = A new column, which will be either target or stop value depending on which is hit first. Example row value: 69.6969
+exit_date = A new column, which will be the corresponding datetime value for when the exit_price was hit on a trade. Example row value: 2018-07-14
+days_in_trade = A new column, which will be the exit date subtracted from the entry date. Example row value: 67
+position_size = identical column from 'price_and_trades_dict'. Example row value: 5287.663335
+win_loss = A new column, which will just be -1 if the stop was hit, and 1 if the target was hit. Example row value: 1
+p_l = A new column, which will just be -100 if win_loss is -1, and 150 if win_loss is 1. Example row value: 150
+
+So those above columns being filled with the appropriate data in each row is the end goal I have in mind. The finished dictionary should look similar to the 'price_and_trades_dict', with identical keys, and then for the values it will have some of the same columns, some new columns, and I think none of the NaN entries, since it'll only be focusing on trade results which have fully filled data.
+
+If you still have the entire code I posted earlier in your memory from earlier in this chat, that will be helpful when I ask you to produce your code to make this new dictioanry, and I encourage you to keep that in your mind.
+
+Ok so now finally I would like you to write some code to accomplish making this new dictionary. Let me give you an overview of how I would tackle this problem as a novice python programmer. There will probably be mistakes and misunderstandings of some concepts by me, but I hope it can help guide you in some potentially successful paths. I'm going to be talking 'stream of consciousness' in plain english/laymen's terms to try and envision what some parts of this new code might look like:
+
+Ok so as a rough sketch I envision creating a function which will take in the dictionary as an argument, and transform it into another dictionary, while preserving the original dictionary. (If we can't do this, then the individual data frames, which are the values in the key:value pairs, should work too). So by having access to the dictionary, I think that means we should have immediate access to all the key:value pairs of the dictionary. If we do not, then we might have to make a little loop which essentially grabs all of the keys which are the stock symbols like 'A' 'AA' 'AAC' etc. And so we've already done that earlier in the code for a different set of data frames. An important thing is that we have all of the stock symbol .csv files downloaded, which are just called A.csv, AA.csv, AAC.csv, etc. which is fantastic, so I'm thinking we can use something similar to this if we need to grab those identical keys:
+
+"filepaths = []
+trade_entries_dict = {}
+
+for file in glob.glob('*.csv'):
+  filepaths.append(file)
+
+for path in filepaths:
+  symbol = path.split('.')[0]
+  symbols_df = pd.read_csv(path, index_col='datetime', parse_dates=['datetime'])
+  entry_df = create_entry_df(symbols_df)
+  trade_entries_dict[symbol] = entry_df"
+
+Something like that may be completely unncessary, but I'm just spit balling ideas incase you may need to grab all the keys. 
+
+Ok so further down the line, let's say we've got access to all the data that's needed, and now we are looking to really dive into the 'price_and_data_dict' and get what we need. So first off, making the 'trade_num' column should be pretty easy, you just start it at 1 and count +1 for every row that is made. We may also have to specifically set this as the index, which should be simple but also important. Next, it seems like it should be fairly easy to copy/keep the identical columns and all their associated data for each symbol. Maybe that could be done with a simple loop, or that may not even be needed. Since it's all identical, all I basically want is to just keep these columns as they are, except they won't have every single row, they'll be the same columns but only have rows where trades were triggered. Basically some of the rows for these identical columns will be discarded, and only the rows left will be the ones where trades are happening for these columns.
+
+So we'll also have to create those new columns which will be a bit more difficult I think. The main conceptual problem is based around describing what constitutes a trade to the iterating loop, but I have an idea. Anytime there is a valid 'target' value in a row that isn't NaN, then that will indicate a row in which a trade has been triggered. And so the 'entry_date' will be the corresponding datetime to wherever that 'target' value is found and valid. And so now the loop will go from this point and onward and see whether the 'target' or 'stop' price of the current row are 'hit' in future rows. Being 'hit' means either the 'target' price is less than or equal to future row values of 'open' or 'high' or 'low' or 'close' prices, OR the 'stop' price is greater than or equal to future row values of 'open' or 'high' or 'low' or 'close' prices. And so the 'exit_price' will be either the original 'target' or 'stop' price, whichever is crossed over first in the future rows of the 'high' 'low' 'open' 'close' columns. And so the 'exit_date' will just correspond to the datetime index of the row where the 'exit_price' was hit for the current valid trade. And as far as the 'days_in_trade', 'win_loss', and 'p_l' these will be very straightforward columns to create and fill with the appropriate row values. Also in regards to some potential error catches, if the loop has found a trade but it is still in the trade without an exit because the 'target' or 'stop' never get crossed, then it should ignore or dismiss this, and simply continue searching for the next trade until it's searched through an entire stock symbol (key), and then move onto the next key:value pair until they are all iterated through.
+
+Example explaining that my thought process: Let's say the loop finds a row with a valid 'target' number, where 'target' is not NaN. Great, this means that it's a valid trade row that has been triggered that we want to pay attention to. So the loop keeps in mind the datetime index for this trade, which will be the current 'entry_date' where this trade has valid data in it. It also keeps in mind the 'target' and 'stop' price for that row. Some example numbers, we might see an 'entry' price of 65, a 'target' price of 67, and a 'stop' price of 63, and a 'entry_date' of 2018-06-23. So the loop then starts searching from this row and onward for if the future prices (open, high, low, close) crosses or hits the 'target' of 67 first or the 'stop' of 63 first. So it just iterates through the next rows until either 67 is crossed or 63 is crossed. So it might cross above the 'target' price first a few days later on datetime index 2018-06-29, let's say the high for that day hit 67.1. So the 'exit_date' would be 2018-06-29 because the trades 'target' price has been crossed/hit. The 'exit_price' would be the 'target' price of 67. The 'days_in_trade' would be 6. The 'trade_num' would be recorded, if it was the first valid trade found it would be 1. The 'win_loss' would be 1. The 'p_l' would be 150. So that would be one row of data, along with the other identical column row values. Then the loop would just be searching for the next trade, and repeating the processes, finding all these valid trades, and seeing if the 'target' or 'stop' price is hit first, and recording the trade results as described. This would be done for each key:value pair, either within our function or elsewhere.
+
+And so if we've done everything correct, this function should spit out, I'm guessing, either a single data frame containing all these columns with the trade results data for a single key:value pair, (for each stock), or just the entire new dictionary if it can manage that. If it's not desired to directly output a new dictionary, and instead just single data frames for each stock symbol, then we should simply be able to put all those data frames together based on all the keys (stock symbols), into our final dictionary 'trade_results_dict' with all that nice data.
+
+That is the end of my 'stream of consciousness' where I attempt to put plain english on the problem for you to understand, along with some ideas at tackling the problem of making this new dictionary. See if you can help me make this new dictionary, and if you are able to, output some code that you think may help create this new dictionary to house the trading results data. 
 
 
-I just want to spot a valid trade entry when iterating the rows, by seeing if the 'target' value is positive. If it is, then the iteration has landed upon a valid trade entry. Thus, we have the entry date equal the current datetime index of where this iteration is.
 
-
-I essentially want the loop to hop back to the entry place and then start searching for the next entry (when target and stop are both positive)
-When it finds an entry, then it starts looking for c1 or c2 to be met. When they are met, it fills the data, and then hops back to the last entry row,
-and begins searching for the next entry (when target and stop are both positive)
-
-
-
-"You can simply use the index value of the corresponding row as the entry or exit date for the trade in the trade_results_df DataFrame."
-
- if row['target'] > 0 and row['stop'] > 0:
-
-                    exit_date_index = price_and_trades_df.loc[row.name+pd.Timedelta(days=1):][c1].index
-                    exit_date = exit_date_index.values[0]
-                    days_in_trade = (exit_date - entry_date).days
-
-                trade_results_df.loc[trade_num] = {'trade_num': trade_num,
-                                'entry_date': entry_date, 
-                                'exit_date': exit_date, 
-                                'days_in_trade': days_in_trade, 
-                                'win_loss': win_loss, 
-                                'p_l': p_l}
-
-                target_exit = (row['target'] <= row['open']) or (row['target'] <= row['high']) or (row['target'] <= row['low']) or (row['target'] <= row['close'])
-                stop_exit = (row['stop'] >= row['open']) or (row['stop'] >= row['high']) or (row['stop'] >= row['low']) or (row['stop'] >= row['close'])
-
-
-                    exit_date = pd.NaT
-                    days_in_trade = np.NaN
-                    win_loss = np.NaN
-                    p_l = np.NaN
-
-
-        trade_results_dict[symbol] = trade_results_df
-
-    return trade_results_dict
-
-trade_results_dict = create_trade_results_dict(price_and_trades_dict)
-
-
-I need a loop that loops through the rows in price_and_trades_dict for each key (stock ticker), and finds the following data and stores it in another dictionary called 'entry_info_dict' with the following info:
-
-pos_size
-entry price
-entry date
-target price
-stop price
-
-THEN, I need a loop that iterates through the rows in price_and_trades_df, STARTING at the entry date of a trade (Where the 'target' value is positive and therefore exists), and finds the following data and stores it in a DataFrame called 'exit_info_df' with the following info:
-
-exit_price (will be either target or stop value from other DataFrame, depending on which is hit first)
-exit_date (When either target or stop is first hit)
-days in trade (Easy subtraction of exit - entry date)
-win_loss (-1 for stop hit, +1 for target hit)
-p_l (-100 for stop hit, +150 for target hit)
-
-Making sure we have all the pieces of info:
-
-'pos_size'
-'target price'
-'stop price'
-'entry_price'
-'exit_price'
-'entry_date'
-'exit_date'
-'days_in_trade' 
-'win_loss' 
-'p_l' 
 
 
