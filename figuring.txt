@@ -141,5 +141,10 @@ That is the end of my 'stream of consciousness' where I attempt to put plain eng
 
 
 
+So great, we got it *almost* working. But there are some things wrong with it that I'm trying to understand clearly.
 
+We will take an example trade:
+
+trade num    entry date     entry      target       stop       exit_price       exit_date          days in trade     pos size        w/l   p/l
+   9         2019-06-25   70.625999   72.441723   69.415517    72.441723    2019-10-18 00:00:00       115           5834.533886        1   150 
 
