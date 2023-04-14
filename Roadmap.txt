@@ -1,4 +1,1 @@
-(graphs, visiuals, sums of the columns, total # trades, total p_l for strategy either per stock or for all stocks, etc.)
-(perhaps fixing the clunkier parts of the code the entries df, probably can just make that a dictionary much easier)
-(probably dont even need to download .csv files, seems kinda useless)
-(clear comments, etc.)
+Nothing for now.
