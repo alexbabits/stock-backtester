@@ -1,2 +1,1 @@
 1. Variable position size or fixed position size, and variable p/l amounts instead of +150 and -100 fixed?
-2. Replace pie chart with: Adding +1/-1 'win_loss' statistics to the 'days_in_trade' chart.
