@@ -1,0 +1,1 @@
+Custom stock backtester. Can download X number of stocks from yahoo finance. Custom basic strategy. Iteratively pulls random samples and plots gaussian distribution to determine the average return expected.
